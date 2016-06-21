@@ -1,0 +1,162 @@
+{% extends "bootstrap/base.html" %}
+{% block styles %}
+{{super()}}
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/formvalidation/0.6.1/css/formValidation.min.css" />
+{% endblock %}
+{% block title %}L-Root Single Registration Page{% endblock %}
+{% macro render_field(field) %}
+          <div class="form-group">
+            <div class="col-xs-5">
+              {{ field(**kwargs)|safe }}
+            </div>
+            {{ field.label }}
+          </div>
+          {% if field.errors %}
+            <div class="alert alert-danger" role="alert">
+              <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+              <span class="sr-only">Error:</span>
+            {% for error in field.errors %}
+              {{ error }}<br />
+            {% endfor %}
+          </div>
+          {% endif %}
+{% endmacro %}
+{% block body %}
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        L-Root Single Registration
+      </div>
+      <hr>
+    </div>
+    <form id="registration" class="form-horizontal">
+      <ul class="nav nav-tabs">
+        <li class="active"><a href="#basic-tab" data-toggle="tab">Basic Details</a></li>
+        <li><a href="#contact-tab" data-toggle="tab">Contacts</a></li>
+      </ul>
+      <div class="tab-content">
+        <div class="tab-pane active" id="basic-tab">
+          {{ render_field(form.legal_name) }}
+          {{ render_field(form.gse_email) }}
+          {{ render_field(form.signed_nda) }}
+          {{ render_field(form.signed_contract) }}
+        </div>
+        <div class="tab-pane" id="contact-tab">
+          {{ render_field(form.primary_contact_name) }}
+          {{ render_field(form.primary_contact_phone) }}
+          {{ render_field(form.primary_contact_email) }}
+        </div>
+        <ul class="pager wizard">
+          <li class="previous"><a href="javascript: void(0);">Previous</a></li>
+          <li class="next"><a href="javascript: void(0);">Next</a></li>
+        </ul>
+      </div>
+    </form>
+    <div class="modal fade" id="completeModal" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Complete</h4>
+          </div>
+
+          <div class="modal-body">
+            <p class="text-center">We have your details you should be able to collect your iso from ...</p>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-success" data-dismiss="modal">Visit the website</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+{% block scripts %}
+{{super()}}
+<script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap-wizard/1.2/jquery.bootstrap.wizard.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/formvalidation/0.6.1/js/formValidation.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/formvalidation/0.6.1/js/framework/bootstrap.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('#registration')
+        .formValidation({
+            framework: 'bootstrap',
+            icon: {
+                valid: 'glyphicon glyphicon-ok',
+                invalid: 'glyphicon glyphicon-remove',
+                validating: 'glyphicon glyphicon-refresh'
+            },
+            // This option will not ignore invisible fields which belong to inactive panels
+            excluded: ':disabled',
+            fields: {
+                legal_name: {
+                    validators: {
+                        notEmpty: {
+                            message: 'The site name is required'
+                        }
+                    }
+                }
+            }
+        })
+        .bootstrapWizard({
+            tabClass: 'nav nav-pills',
+            onTabClick: function(tab, navigation, index) {
+                return validateTab(index);
+            },
+            onNext: function(tab, navigation, index) {
+                var numTabs    = $('#registration').find('.tab-pane').length,
+                    isValidTab = validateTab(index - 1);
+                if (!isValidTab) {
+                    return false;
+                }
+
+                if (index === numTabs) {
+                    // We are at the last tab
+
+                    // Uncomment the following line to submit the form using the defaultSubmit() method
+                    // $('#registration').formValidation('defaultSubmit');
+
+                    // For testing purpose
+                    $('#completeModal').modal();
+                }
+
+                return true;
+            },
+            onPrevious: function(tab, navigation, index) {
+                return validateTab(index + 1);
+            },
+            onTabShow: function(tab, navigation, index) {
+                // Update the label of Next button when we are at the last tab
+                var numTabs = $('#registration').find('.tab-pane').length;
+                $('#registration')
+                    .find('.next')
+                        .removeClass('disabled')    // Enable the Next button
+                        .find('a')
+                        .html(index === numTabs - 1 ? 'Install' : 'Next');
+
+                // You don't need to care about it
+                // It is for the specific demo
+                adjustIframeHeight();
+            }
+        });
+
+    function validateTab(index) {
+        var fv   = $('#registration').data('formValidation'), // FormValidation instance
+            // The current tab
+            $tab = $('#registration').find('.tab-pane').eq(index);
+
+        // Validate the container
+        fv.validateContainer($tab);
+
+        var isValidStep = fv.isValidContainer($tab);
+        if (isValidStep === false || isValidStep === null) {
+            // Do not jump to the target tab
+            return false;
+        }
+
+        return true;
+    }
+});
+</script>
+{% endblock %}

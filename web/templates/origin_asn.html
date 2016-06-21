@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% import "macros.jinja" as macros %}
+{% block my_content %}
+  <div class="row">
+    <div class="col-md-6">
+      <h3>ASN: {{ asn.origin_origin_asn_id }}</h3>
+      <h4>Transit ASNs: <small>
+{% for asn in asn.transit_asns_list %}
+          <a href="{{ url_for('origin_asn', asn=asn) }}">{{ asn }}</a>
+{% endfor %}
+      </small></h4> 
+      <h4>Downstream ASNs: <small>
+{% for asn in asn.downstream_asns_list %}
+          <a href="{{ url_for('origin_asn', asn=asn) }}">{{ asn }}</a>
+{% endfor %}
+      </small></h4> 
+      <h4>Paths: <small>
+      <table id="paths" class="table table-striped table-bordered">
+        <thead>
+          <th>Size</th>
+          <th>Path</th>
+        </thead>
+        <tbody>
+{% for path in asn.paths %}
+          <tr>
+            <td>{{ path|length }}</td>
+            <td>{{ path.path }}</td>
+          </tr>
+{% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="col-md-6">
+        <div class="statwdgtauto" id="ripestat-overveiw"></div>
+        <div class="statwdgtauto" id="ripestat-neighbours"></div>
+    </div>
+  </div>
+{% endblock %}
+{% block scripts %}
+{{super()}}
+<script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap-wizard/1.2/jquery.bootstrap.wizard.min.js"></script>
+<script>
+$(document).ready(function() {
+  ripestat.init(
+    "as-overview",
+    {"resource":"AS{{ asn.origin_asn_id }}"},
+    "ripestat-overveiw",
+    {"size":"medium",
+      "disable":["title", "container", "logo", 
+      "feedback", "maximize", "footer-buttons"]})
+  ripestat.init(
+    "asn-neighbours",
+    {"resource":"AS{{ asn.origin_asn_id }}"},
+    "ripestat-neighbours",
+    {"size":"medium",
+      "disable":["title", "container", "logo",
+      "feedback", "maximize", "footer-buttons"]})
+  $('#paths').dataTable()
+});
+{% for meauserment in asn.meauserments %}
+  $("#meauserment_{{ meauserment.msm_id }}").on('click', function(e) {
+    e.preventDefault(); // cancel the link itself
+    $.post(this.href, { msm_id: {{meauserment.msm_id }} }, window.location.reload(true))
+  })
+{% endfor %}
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+</script>
+{% endblock %}

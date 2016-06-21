@@ -1,0 +1,39 @@
+{% extends "bootstrap/base.html" %}
+{% import "macros.jinja" as macros %}
+{% block styles %}
+{{super()}}
+  <link href="https://cdn.datatables.net/plug-ins/1.10.7/integration/bootstrap/3/dataTables.bootstrap.css" rel="stylesheet" />
+<style type="text/css">
+#installationForm .tab-content {
+    margin-top: 20px;
+}
+</style>
+{% endblock %}
+{% block title %}Atlas traceroute analyser{% endblock %}
+{% block content %}
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        Atlas traceroute analyser
+      </div>
+      <hr>
+    </div>
+    <noscript>
+      <div class="row">
+        <div class="alert alert-danger" role="alert">
+          For full functionality of this site it is necessary to enable JavaScript.<br />
+          Here are the <a href="http://www.enable-javascript.com/" target="_blank">
+          instructions to enable JavaScript in your web browser</a>.
+        </div>
+      </div>
+    </noscript>
+    {{ macros.flash_messages()|safe }}
+    {% block my_content%}
+    {% endblock %}
+{% endblock %}
+{% block scripts %}
+{{super()}}
+  <script src="https://stat.ripe.net/widgets/widget_api.js"></script>
+  <script src="https://cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/plug-ins/1.10.7/integration/bootstrap/3/dataTables.bootstrap.js"></script>
+{% endblock %}

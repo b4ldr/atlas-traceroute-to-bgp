@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% import "macros.jinja" as macros %}
+{% block my_content %}
+  <table id="asns" class="table table-striped table-bordered">
+    <thead>
+      <th>Prefix</th>
+      <th>Atlas Measurments</th>
+    </thead>
+    <tbody>
+    {% for asn in asns %}
+      <tr>
+        <td><a href="{{ url_for('asn', asn=asn.asn_id) }}">
+            {{ asn.asn_id }}
+        </a></td>
+        <td>{% for meauserment in asn.meauserments %}{{ meauserment.msm_id }}{% endfor %}</td>
+      </tr>
+  {% endfor %}
+{% endblock %}
+{% block scripts %}
+{{super()}}
+<script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap-wizard/1.2/jquery.bootstrap.wizard.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/formvalidation/0.6.1/js/formValidation.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/formvalidation/0.6.1/js/framework/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/6.4.1/js/intlTelInput.min.js"></script>
+<script>
+$(document).ready(function() {
+  {% if success %}
+    $('#completeModal').modal();
+  {% endif %}
+});
+</script>
+{% endblock %}

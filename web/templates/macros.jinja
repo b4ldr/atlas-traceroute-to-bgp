@@ -1,0 +1,132 @@
+{% macro flash_messages() %}
+{% with messages = get_flashed_messages(with_categories=True) %}
+    {% if messages %}
+    <div class="row">
+      <div id='flash_message_container'>
+        {% for category, msg in messages %}
+            {%- if category == 'error' %}
+            <div class="alert alert-danger">
+            {%- else %}
+            <div class="alert alert-{{ category }}">
+            {%- endif %}
+                <button type="button" class="close" data-dismiss="alert">×</button>
+                {{ msg }}
+            </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+{% endwith %}
+{% endmacro %}
+{%- macro validate_phone_meta(field) -%}
+  $('#registration')
+    .find('[name="{{field}}"]')
+      .intlTelInput({
+        defaultCountry: 'auto',
+        geoIpLookup: function(callback) {
+          $.get('http://ipinfo.io', function() {}, "jsonp").always(function(resp) {
+            var countryCode = (resp && resp.country) ? resp.country : "";
+            callback(countryCode);
+          });
+        },
+        preferredCountries: [],
+        utilsScript: '{{ url_for("static", filename="utils.js") }}',
+        autoPlaceholder: true,
+      });
+{%- endmacro -%}
+{%- macro validate_range(field, min, max, requiered=True) -%}
+      {{ field }}: {
+        validators: {
+  {%- if requiered -%}
+          notEmpty: {
+            message: 'Required'
+          },
+  {%- endif -%}
+          between: {
+            min: {{ min }},
+            max: {{ max }},
+            message: 'value must be between {{min}} and {{max}}'
+          },
+        }
+      },
+{%- endmacro -%}
+{%- macro validate_ip(field, af, requiered=True) -%}
+      {{ field }}: {
+        validators: {
+  {%- if requiered -%}
+          notEmpty: {
+            message: 'Required'
+          },
+  {%- endif -%}
+          ip: {
+  {%- if af == 4 -%}
+            ipv6: false,
+  {%- else -%}
+            ipv4: false,
+  {%- endif -%}
+            message: 'must be a valid ipv{{ af }}'
+          },
+        }
+      },
+{%- endmacro -%}
+{%- macro validate_password(field, match) -%}
+      {{ field }}: {
+        validators: {
+          identical: {
+            field: {{ match }},
+            message: 'The passwords must match'
+          },
+          notEmpty: {
+            message: 'Required'
+          },
+        }
+      },
+{%- endmacro -%}
+{%- macro validate_phone(field) -%}
+      {{ field }}: {
+        validators: {
+          callback: {
+            message: 'The phone number is not valid',
+            callback: function(value, validator, $field) {
+              return value === '' || $field.intlTelInput('isValidNumber');
+            }
+          },
+          notEmpty: {
+            message: 'Required'
+          },
+        }
+      },
+{%- endmacro -%}
+{%- macro validate(field, type, requiered=True) -%}
+      {{ field }}: {
+        validators: {
+  {%- if requiered -%}
+          notEmpty: {
+            message: 'Required'
+          },
+  {%- endif -%}
+  {%- if type -%}
+          {{ type }}: {
+            message: '{{ type }} is not valid'
+          }
+  {%- endif -%}
+        }
+      },
+{%- endmacro -%}
+{%- macro render_field(field) -%}
+          <div class="form-group">
+            {{ field.label(class_="col-xs-3 control-label") }}
+            <div class="col-xs-5">
+              {{ field(class_="form-control")|safe }}
+            </div>
+          </div>
+          {%- if field.errors -%}
+            <div class="alert alert-danger" role="alert">
+              <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+              <span class="sr-only">Error:</span>
+            {%- for error in field.errors -%}
+              {{ error }}<br />
+            {%- endfor -%}
+          </div>
+          {%- endif -%}
+{%- endmacro -%}
