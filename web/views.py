@@ -8,8 +8,12 @@ from trace2bgp.utils import Lookup, get_sagan_objects, get_cousteau_object
 from ripe.atlas.cousteau import Measurement
 from flask import render_template, redirect, url_for, request, flash, session
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
+    if request.method == 'POST':
+        asn = request.form.get('asn', None)
+        if asn:
+            return redirect(url_for('asn', asn=asn))
     asns = models.Asn.query.order_by(models.Asn.asn_id).all()
     return render_template('index.html', asns=asns)
 
