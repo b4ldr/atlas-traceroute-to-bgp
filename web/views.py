@@ -1,7 +1,8 @@
+import models
 from logging import debug, error, warning, info
 from IPy import IP
 from datetime import datetime
-from web import app, PYASN_FILE, models, db
+from web import app, PYASN_FILE, db
 from trace2bgp.atlas import Asn, Asns
 from trace2bgp.utils import Lookup, get_sagan_objects, get_cousteau_object
 from ripe.atlas.cousteau import Measurement
