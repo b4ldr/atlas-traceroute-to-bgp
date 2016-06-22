@@ -73,10 +73,14 @@
   {% for origin_asn in asn.origin_asns %}
         <tr>
           <td><a href="{{ url_for('origin_asn', asn=origin_asn.origin_asn_id) }}">{{ origin_asn.origin_asn_id }}</a></td>
-          <td data-toggle="tooltip" title="{{ origin_asn.paths|join(', ') }}">{{ origin_asn.paths|length }}</td>
+          <td data-toggle="tooltip">{{ origin_asn.paths|length }}</td>
           <td>{{ origin_asn.min_path_len }}</td>
           <td>{{ origin_asn.max_path_len }}</td>
-          <td data-toggle="tooltip" title="{{ origin_asn.transit_asns }}">{{ origin_asn.transit_asns|wordcount }}</td>
+          <td>
+            <div data-toggle="tooltip" title="{{ origin_asn.transit_asns }}">
+              {{ origin_asn.transit_asns|wordcount }}
+            </div>
+          </td>
           <td data-toggle="tooltip" title="{{ origin_asn.downstream_asns }}">{{ origin_asn.downstream_asns|wordcount }}</td>
         </tr>
   {% endfor %}
