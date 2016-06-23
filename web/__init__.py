@@ -11,6 +11,7 @@ app        = Flask(__name__)
 db         = SQLAlchemy(app)
 Bootstrap(app)
 app.config.from_object('config')
+app.secret_key = '@U@5K6.B7ppi_ShyyhrH7C@}X&F/LN<pidu]C1G'
 
 logging.basicConfig(level=logging.DEBUG)
 
