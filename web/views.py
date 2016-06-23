@@ -74,9 +74,11 @@ def update_origin_asn(asn_model, asns, ip_version):
 @app.route('/asn/<int:asn>', methods=['GET', 'POST'])
 def asn(asn):
     asn_model = models.Asn.query.filter_by(asn_id=asn).first()
+    action = 'Updated'
     if not asn_model:
         asn_model = models.Asn(asn_id = asn)
         db.session.add(asn_model)
+        action = 'Added'
     if request.method == 'POST':
         msm_id     = request.form.get('msm_id', None)
         clear_data = request.form.get('clear_data', False)
@@ -86,7 +88,7 @@ def asn(asn):
                 cousteau_object = get_cousteau_object(msm_id)
                 sagan_object    = get_sagan_objects(cousteau_object)
                 asns            = Asns(sagan_object, PYASN_FILE)
-                flash('Atlas Measurement added: {}'.format(msm_id)) 
+                flash('Atlas Measurement {}: {}'.format(action, msm_id), 'info') 
                 update_msm(asn_model, msm_meta)
                 update_origin_asn(asn_model, asns, msm_meta.protocol)
         if clear_data:
