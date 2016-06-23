@@ -54,20 +54,22 @@ def update_msm(asn_model, msm_meta):
 def update_origin_asn(asn_model, asns, ip_version):
     for asn in asns.asns:
         orig_asn_model = models.OriginAsn.query.filter_by(
-                origin_asn_id=asn.id, ip_version=ip_version).first()
+                origin_asn=asn.id, ip_version=ip_version).first()
         if not orig_asn_model:
             orig_asn_model = models.OriginAsn(
-                    origin_asn_id=asn.id, asn=asn_model, ip_version=ip_version)
+                    origin_asn=asn.id, asn=asn_model, ip_version=ip_version)
             db.session.add(orig_asn_model)
         orig_asn_model.downstream_asns = ', '.join(asn.downstream_asns)
         orig_asn_model.transit_asns    = ', '.join(asn.transit_asns)
         for path in asn.paths:
             path_str = ', '.join(path)
-            path_model = models.Path.query.filter_by(
-                    asn=orig_asn_model, path=path_str).first()
+            path_model = models.Path.query.filter_by(path=path_str).first()
             if not path_model:
-                path_model = models.Path(asn=orig_asn_model, path=path_str)
+                path_model = models.Path(origin_asn=[orig_asn_model], path=path_str)
                 db.session.add(path_model)
+            else:
+                orig_asn_model.paths.append(path_model)
+                db.session.merge(orig_asn_model)
 
 @app.route('/asn/<int:asn>', methods=['GET', 'POST'])
 def asn(asn):
@@ -76,22 +78,26 @@ def asn(asn):
         asn_model = models.Asn(asn_id = asn)
         db.session.add(asn_model)
     if request.method == 'POST':
-        msm_id = request.form['msm_id']
-        msm_meta = check_msm(msm_id, asn)
-        if msm_meta:
-            cousteau_object = get_cousteau_object(msm_id)
-            sagan_object    = get_sagan_objects(cousteau_object)
-            asns            = Asns(sagan_object, PYASN_FILE)
-            flash('Atlas Measurement added: {}'.format(msm_id)) 
-            update_msm(asn_model, msm_meta)
-            update_origin_asn(asn_model, asns, msm_meta.protocol)
+        msm_id     = request.form.get('msm_id', None)
+        clear_data = request.form.get('clear_data', False)
+        if msm_id:
+            msm_meta = check_msm(msm_id, asn)
+            if msm_meta:
+                cousteau_object = get_cousteau_object(msm_id)
+                sagan_object    = get_sagan_objects(cousteau_object)
+                asns            = Asns(sagan_object, PYASN_FILE)
+                flash('Atlas Measurement added: {}'.format(msm_id)) 
+                update_msm(asn_model, msm_meta)
+                update_origin_asn(asn_model, asns, msm_meta.protocol)
+        if clear_data:
+            db.session.query(models.OriginAsn.asn_id == asn).delete()
 
     db.session.commit()
     return render_template('asn.html', asn=asn_model)
 
 @app.route('/origin_asn/<int:asn>')
 def origin_asn(asn):
-    asn_model = models.OriginAsn.query.filter_by(origin_asn_id=asn).first()
+    asn_models = models.OriginAsn.query.filter_by(origin_asn=asn).all()
     if not asn_model:
         flash('AS{} not in DB')
-    return render_template('origin_asn.html', asn=asn_model)
+    return render_template('origin_asn.html', asn=asn_models)

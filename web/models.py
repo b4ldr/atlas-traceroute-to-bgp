@@ -1,5 +1,9 @@
 from web import db
 
+paths_join = db.Table('paths_join', 
+        db.Column('path_id', db.Integer, db.ForeignKey('path.path_id')),
+        db.Column('origin_asn_id', db.Integer, db.ForeignKey('origin_asn.origin_asn_id')))
+
 class Meauserment(db.Model):
     msm_id      = db.Column(db.Integer, primary_key=True, autoincrement=False)
     asn_id      = db.Column(db.Integer, db.ForeignKey('asn.asn_id'))
@@ -19,9 +23,9 @@ class Asn(db.Model):
         return '<Asn {}>'.format(self.asn_id)
 
 class Path(db.Model):
-    path_id       = db.Column(db.Integer, primary_key=True)
-    origin_asn_id = db.Column(db.Integer, db.ForeignKey(
-        'origin_asn.origin_asn_id'))
+    path_id     = db.Column(db.Integer, primary_key=True)
+    origin_asns = db.relationship(
+        'OriginAsn', secondary=paths_join, backref=db.backref('path'))
     path          = db.Column(db.String, unique=True, nullable=False)
 
     def __repr__(self):
@@ -35,12 +39,13 @@ class Path(db.Model):
         return self.path.split(',')
 
 class OriginAsn(db.Model):
-    origin_asn_id   = db.Column(
-            db.Integer, primary_key = True, autoincrement=False)
-    asn_id    = db.Column(db.Integer, db.ForeignKey('asn.asn_id'))
+    origin_asn_id   = db.Column(db.Integer, primary_key=True)
+    origin_asn      = db.Column(db.Integer)
+    asn_id          = db.Column(db.Integer, db.ForeignKey('asn.asn_id'))
     downstream_asns = db.Column(db.String)
     transit_asns    = db.Column(db.String)
-    paths           = db.relationship('Path', backref = 'asn')
+    paths           = db.relationship(
+        'Path', secondary=paths_join, backref=db.backref('origin_asn'))
     ip_version      = db.Column(db.Integer)
 
     def __repr__(self):
