@@ -100,6 +100,11 @@ def asn(asn):
 @app.route('/origin_asn/<int:asn>')
 def origin_asn(asn):
     asn_models = models.OriginAsn.query.filter_by(origin_asn=asn).all()
-    if not asn_model:
+    if not asn_models:
         flash('AS{} not in DB')
-    return render_template('origin_asn.html', asn=asn_models)
+        return redirect(request.referrer)
+    if len(asn_models) > 2:
+        flash('Found {} entires i shouldn\'t have more then two'.format(
+            len(asn_models)))
+        return redirect(request.referrer)
+    return render_template('origin_asn.html', asns=asn_models)
