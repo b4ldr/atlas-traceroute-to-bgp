@@ -11,3 +11,4 @@ logging.captureWarnings(True)
 handler = RotatingFileHandler(
   '/srv/www/bgp-analyze.dns.icann.org/app.log', maxBytes=10000,backupCount=1)
 handler.setLevel(logging.DEBUG)
+application.logger.addHandler(handler)
