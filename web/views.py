@@ -50,12 +50,14 @@ def update_msm(asn_model, msm_meta):
         db.session.add(measurement_model)
     measurement_model.updated = datetime.now()
 
-def update_origin_asn(asn_model, asns):
+#Need to add ip_version
+def update_origin_asn(asn_model, asns, ip_version):
     for asn in asns.asns:
         orig_asn_model = models.OriginAsn.query.filter_by(
-                origin_asn_id=asn.id).first()
+                origin_asn_id=asn.id, ip_version=ip_version).first()
         if not orig_asn_model:
-            orig_asn_model = models.OriginAsn(origin_asn_id=asn.id, asn=asn_model)
+            orig_asn_model = models.OriginAsn(
+                    origin_asn_id=asn.id, asn=asn_model, ip_version=ip_version)
             db.session.add(orig_asn_model)
         orig_asn_model.downstream_asns = ', '.join(asn.downstream_asns)
         orig_asn_model.transit_asns    = ', '.join(asn.transit_asns)
@@ -82,7 +84,7 @@ def asn(asn):
             asns            = Asns(sagan_object, PYASN_FILE)
             flash('Atlas Measurement added: {}'.format(msm_id)) 
             update_msm(asn_model, msm_meta)
-            update_origin_asn(asn_model, asns)
+            update_origin_asn(asn_model, asns, msm_meta.protocol)
 
     db.session.commit()
     return render_template('asn.html', asn=asn_model)

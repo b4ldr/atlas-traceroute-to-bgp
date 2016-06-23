@@ -23,7 +23,6 @@ class Path(db.Model):
     origin_asn_id = db.Column(db.Integer, db.ForeignKey(
         'origin_asn.origin_asn_id'))
     path          = db.Column(db.String, unique=True, nullable=False)
-    ip_version    = db.Column(db.Integer)
 
     def __repr__(self):
         return '<Path {}>'.format(self.path)
@@ -42,6 +41,7 @@ class OriginAsn(db.Model):
     downstream_asns = db.Column(db.String)
     transit_asns    = db.Column(db.String)
     paths           = db.relationship('Path', backref = 'asn')
+    ip_version      = db.Column(db.Integer)
 
     def __repr__(self):
         return '<OriginAsn {}>'.format(self.origin_asn_id)
