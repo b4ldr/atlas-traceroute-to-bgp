@@ -36,7 +36,9 @@ class Path(db.Model):
 
     @property
     def path_list(self):
-        return self.path.split(',')
+        if self.path:
+            return self.path.split(',')
+        return []
 
 class OriginAsn(db.Model):
     origin_asn_id   = db.Column(db.Integer, primary_key=True)
@@ -53,11 +55,16 @@ class OriginAsn(db.Model):
 
     @property
     def downstream_asns_list(self):
-        return self.downstream_asns.split(',')
+        if self.downstream_asns:
+            return self.downstream_asns.split(',')
+        return []
+        
 
     @property
     def transit_asns_list(self):
-        return self.transit_asns.split(',')
+        if self.transit_asns:
+            return self.transit_asns.split(',')
+        return []
 
     @property
     def min_path_len(self):
