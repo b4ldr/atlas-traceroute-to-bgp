@@ -4,18 +4,83 @@
   <div class="row">
   {% for asn in asns %}
     <div class="col-md-6">
-      <h3>ASN: {{ asn.origin_asn }} IPv{{asn.ip_version }}</h3>
-      <h4>Transit ASNs: <small>
-  {% for _asn in asn.transit_asns_list %}
-        <a href="{{ url_for('origin_asn', asn=_asn) }}">{{ _asn }}</a>
-  {% endfor %}
-      </small></h4> 
-      <h4>Downstream ASNs: <small>
-  {% for _asn in asn.downstream_asns_list %}
-        <a href="{{ url_for('origin_asn', asn=_asn) }}">{{ _asn }}</a>
-  {% endfor %}
-      </small></h4> 
-      <h4>Paths: <small>
+      <div class="row">
+        <div class="col-md-4">
+          <h3>ASN:</h3> 
+        </div>
+        <div class="col-md-8">
+          <h3>{{ asn.origin_asn }} IPv{{asn.ip_version }}</h3>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-4">
+          <h4>Transit ASNs: </h4> 
+        </div>
+        <div class="col-md-8">
+  {% if asn.transit_asns_list|length > 10 %}
+          <div class="row">
+            <div class="col-md-10">
+    {% for _asn in asn.transit_asns_list[:10] %}
+              <a href="{{ url_for('origin_asn', asn=_asn) }}">{{ _asn }}</a>
+    {% endfor %}
+              ... ({{asn.transit_asns_list[10:]|length}} more)
+            </div>
+            <div class="col-md-2 text-right">
+              <button href="#transit_{{asn.ip_version}}" class="btn btn-info" data-toggle="collapse">
+              &darr;
+              </button>
+            </div>
+          </div>
+          <div class="row">
+            <div id="transit_{{asn.ip_version}}" class="row collapse">
+    {% for _asn in asn.transit_asns_list[10:] %}
+              <a href="{{ url_for('origin_asn', asn=_asn) }}">{{ _asn }}</a>
+    {% endfor %}
+            </div>
+          </div>
+  {% else %}
+    {% for _asn in asn.transit_asns_list %}
+            <a href="{{ url_for('origin_asn', asn=_asn) }}">{{ _asn }}</a>
+    {% endfor %}
+  {% endif %}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-4">
+          <h4>Downstream ASNs:</h4>
+        </div>
+        <div class="col-md-8">
+  {% if asn.downstream_asns_list|length > 10 %}
+          <div class="row">
+            <div class="col-md-10">
+    {% for _asn in asn.downstream_asns_list[:10] %}
+              <a href="{{ url_for('origin_asn', asn=_asn) }}">{{ _asn }}</a>
+    {% endfor %}
+              ... ({{asn.downstream_asns_list[10:]|length}} more)
+            </div>
+            <div class="col-md-2 text-right">
+              <button href="#downstreem_{{asn.ip_version}}" class="btn btn-info" data-toggle="collapse">
+              &darr;
+              </button>
+            </div>
+          </div>
+          <div class="row">
+            <div class=col-md-10">
+              <div id="downstreem_{{asn.ip_version}}" class="row collapse">
+    {% for _asn in asn.downstream_asns_list[10:] %}
+                <a href="{{ url_for('origin_asn', asn=_asn) }}">{{ _asn }}</a>
+    {% endfor %}
+              </div>
+            </div>
+          </div>
+  {% else %}
+    {% for _asn in asn.downstream_asns_list %}
+            <a href="{{ url_for('origin_asn', asn=_asn) }}">{{ _asn }}</a>
+    {% endfor %}
+  {% endif %}
+        </div>
+      </div>
+      <h4>Paths:</h4>
         <table id="paths_{{asn.ip_version}}" class="table table-striped table-bordered">
         <thead>
           <th>Size</th>
