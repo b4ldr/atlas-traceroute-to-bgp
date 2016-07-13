@@ -115,14 +115,14 @@
 $(document).ready(function() {
   ripestat.init(
     "as-overview",
-    {"resource":"AS{{ asns[0].origin_asn_id }}"},
+    {"resource":"AS{{ asn.origin_asn }}"},
     "ripestat-overveiw",
     {"size":"compact",
       "disable":["title", "container", "logo", 
       "feedback", "maximize", "footer-buttons"]})
   ripestat.init(
     "asn-neighbours",
-    {"resource":"AS{{ asns[0].origin_asn_id }}"},
+    {"resource":"AS{{ asn.origin_asn }}"},
     "ripestat-neighbours",
     {"size":"compact",
       "disable":["title", "container", "logo",
