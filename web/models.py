@@ -1,6 +1,14 @@
-from web import db
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import DeclarativeBase
 
-paths_join = db.Table('paths_join', 
+from web import app
+
+class Base(DeclarativeBase):
+    pass
+
+db = SQLAlchemy(app, model_class=Base)
+
+paths_join = db.Table('paths_join',
         db.Column('path_id', db.Integer, db.ForeignKey('path.path_id')),
         db.Column('origin_asn_id', db.Integer, db.ForeignKey('origin_asn.origin_asn_id')))
 
@@ -58,7 +66,7 @@ class OriginAsn(db.Model):
         if self.downstream_asns:
             return self.downstream_asns.split(',')
         return []
-        
+
 
     @property
     def transit_asns_list(self):

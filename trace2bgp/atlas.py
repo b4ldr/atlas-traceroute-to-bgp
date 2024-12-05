@@ -1,12 +1,16 @@
 #!/usr/bin/env python
 
-from requests import get
 import logging
+from typing import List, Optional, Tuple
+
+from ripe.atlas.sagan import TracerouteResult  # type: ignore
+
 from trace2bgp.utils import Lookup
+
 
 class Asn(object):
     '''object to hold a single asn and its paths'''
-    def __init__(self, id, original_path):
+    def __init__(self, id: str, original_path: Tuple[str, ...]):
         self.orginal_path    = original_path
         self.id              = id
         self.paths           = set()
@@ -25,8 +29,9 @@ class Asns(object):
     '''object to hold a collection of ASNs'''
     asndb = None
 
-    def __init__(self, sagan_objects, pyasn_file=None):
+    def __init__(self, sagan_objects: List[TracerouteResult], pyasn_file: Optional[str] = None):
         lookup                = Lookup(pyasn_file)
+        # TODO: this is shadowing the lookup method
         self.lookup           = lookup.lookup
         self.logger           = logging.getLogger('trace2bgp.atlas.asns')
         self.sagan_objects    = sagan_objects
@@ -37,19 +42,19 @@ class Asns(object):
         return len(self.asn_paths)
 
     @staticmethod
-    def _remove_prepends(path):
+    def _remove_prepends(path: str) -> Tuple[str, ...]:
         #http://stackoverflow.com/questions/480214/how-do-you-remove-duplicates-from-a-list-in-python-whilst-preserving-order
         seen     = set()
         seen_add = seen.add
         return tuple([x for x in path if not(x in seen or seen_add(x))])
-    
-    def lookup(self, ip):
+
+    def lookup(self, ip: str) -> Optional[str]:
         if self.asndb:
             asn = self.asndb.lookup(ip)[0]
             if asn:
                 return str(asn)
-        else:
-            return self.whois.lookup(ip).asn
+        # TODO: there is no whois
+        return self.whois.lookup(ip).asn
 
     @property
     def asns(self):
@@ -96,7 +101,7 @@ class Asns(object):
                 continue
             asn_path = []
             self.logger.debug('Checking: {}'.format(result.source_address))
-            msm_asn = self.lookup(result.source_address)
+            msm_asn = self.lookup(result.source_address) # type: ignore
             if msm_asn:
                 self.logger.debug('Adding: {}'.format(msm_asn))
                 asn_path.append(msm_asn)

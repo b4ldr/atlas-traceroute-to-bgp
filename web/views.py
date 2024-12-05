@@ -1,12 +1,15 @@
-import models
-from logging import debug, error, warning, info
-from IPy import IP
 from datetime import datetime
-from web import app, PYASN_FILE, db
+from logging import debug, error, info, warning
+
+from flask import flash, redirect, render_template, request, session, url_for
+from IPy import IP  # type: ignore
+from ripe.atlas.cousteau import Measurement  # type: ignore
+
 from trace2bgp.atlas import Asn, Asns
-from trace2bgp.utils import Lookup, get_sagan_objects, get_cousteau_object
-from ripe.atlas.cousteau import Measurement
-from flask import render_template, redirect, url_for, request, flash, session
+from trace2bgp.utils import Lookup, get_cousteau_object, get_sagan_objects
+from web import PYASN_FILE, app, models
+from web.models import db
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -29,7 +32,7 @@ def check_msm(msm_id, asn):
         debug('{}'.format(e))
         flash('{}'.format(e), 'error')
         return False
-        
+
     if msm_meta.type != 'traceroute':
         flash('measurement {} is {} not traceroute'.format(
             msm_id, msm_meta.type), 'error')
@@ -88,7 +91,7 @@ def asn(asn):
                 cousteau_object = get_cousteau_object(msm_id)
                 sagan_object    = get_sagan_objects(cousteau_object)
                 asns            = Asns(sagan_object, PYASN_FILE)
-                flash('Atlas Measurement {}: {}'.format(action, msm_id), 'info') 
+                flash('Atlas Measurement {}: {}'.format(action, msm_id), 'info')
                 update_msm(asn_model, msm_meta)
                 update_origin_asn(asn_model, asns, msm_meta.protocol)
         if clear_data:
